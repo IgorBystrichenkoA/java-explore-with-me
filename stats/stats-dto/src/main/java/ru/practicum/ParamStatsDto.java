@@ -1,5 +1,7 @@
 package ru.practicum;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -17,7 +19,8 @@ public class ParamStatsDto {
     @NotNull
     LocalDateTime end;
     List<String> uris;
-    Boolean unique;
+    @JsonSetter(nulls = Nulls.SKIP)
+    Boolean unique = false;
 
     @AssertFalse(message = "Incorrect period")
     public boolean isValidReleaseDate() {

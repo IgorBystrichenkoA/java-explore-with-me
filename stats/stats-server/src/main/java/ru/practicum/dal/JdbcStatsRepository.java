@@ -27,12 +27,11 @@ public class JdbcStatsRepository implements StatsRepository {
         String count = unique ? "COUNT(DISTINCT ip)" : "COUNT(*)";
         String uris = checkUri ? " AND (uri IN (:uris))" : "";
         return String.format("""
-                SELECT app, uri, %s, hits
+                SELECT app, uri, %s hits
                 FROM endpointHits
-                WHERE (timestamp >= :start AND timestamp <= :end) %s
+                WHERE (timestamp >= :start AND timestamp <= :end)%s
                 GROUP BY app, uri
-                ORDER BY hits DESC
-                """, count, uris);
+                ORDER BY hits DESC""", count, uris);
     }
 
     private static StatsDto mapRowTo(ResultSet rs, int rowNum) throws SQLException {
