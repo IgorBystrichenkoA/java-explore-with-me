@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import jakarta.validation.ValidationException;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.event.model.QEvent;
@@ -63,6 +64,7 @@ public class PublicEventParam {
 
         BooleanExpression onlyPublished = QEvent.event.publishedOn.before(LocalDateTime.now());
         BooleanBuilder booleanBuilder = new BooleanBuilder(onlyPublished);
+        booleanBuilder.and(Expressions.TRUE);
         if (text != null) {
             BooleanExpression byAnnotation = QEvent.event.annotation.containsIgnoreCase(text);
             BooleanExpression byDescription = QEvent.event.description.containsIgnoreCase(text);

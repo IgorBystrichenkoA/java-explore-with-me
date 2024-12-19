@@ -40,7 +40,6 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilationToSave = Compilation.builder()
                 .pinned(compilationDto.getPinned())
                 .title(compilationDto.getTitle())
-                .eventList(compilationDto.getEvents())
                 .events(events)
                 .build();
         Compilation compilationSaved = compilationRepository.save(compilationToSave);
@@ -56,8 +55,8 @@ public class CompilationServiceImpl implements CompilationService {
         log.info("ADMIN: Запрос на удаление подборки события");
 
         compilationRepository.getCompilationById(id).orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMPILATION));
-
         compilationRepository.deleteById(id);
+
         log.info("Подборка событий удалена");
     }
 
@@ -70,7 +69,8 @@ public class CompilationServiceImpl implements CompilationService {
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMPILATION));
 
         if (updateCompilationRequest.getEvents() != null) {
-            compilationFromDb.setEventList(updateCompilationRequest.getEvents());
+            List<Event> events = eventRepository.getAllByIdIn(updateCompilationRequest.getEvents());
+            compilationFromDb.setEvents(events);
         }
         if (updateCompilationRequest.getPinned() != null) {
             compilationFromDb.setPinned(updateCompilationRequest.getPinned());
@@ -101,10 +101,6 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = compilationRepository.getCompilationById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMPILATION));
-        if (compilation.getEventList() != null) {
-            List<Event> eventList = eventRepository.getAllByIdIn(compilation.getEventList());
-            compilation.setEvents(eventList);
-        }
 
         log.info("PUBLIC: Получена подборка событий {} по id {}", compilation, id);
         return compilation;

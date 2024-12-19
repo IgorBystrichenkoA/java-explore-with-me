@@ -19,7 +19,6 @@ import ru.practicum.ewm.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -68,11 +67,12 @@ public class RequestServiceImpl implements RequestService {
                 && eventFromDb.getParticipantLimit().equals((long) eventFromDb.getConfirmedRequests().size())) {
             throw new ConditionsNotRespected(String.format(EVENT_REACHED_MAX_PARTICIPANTS, eventFromDb.getId()));
         }
-        Optional<Request> requestAlreadyExist =
-                requestRepository.findRequestByRequesterIdAndEventId(userFromDb.getId(), eventFromDb.getId());
-        if (requestAlreadyExist.isPresent()) {
-            throw new ConditionsNotRespected(String.format(ALREADY_EXISTING_REQUEST_FOR_EVENT, eventFromDb.getId()));
-        }
+        requestRepository.findRequestByRequesterIdAndEventId(userFromDb.getId(), eventFromDb.getId())
+                .ifPresent(r -> {
+                    throw new ConditionsNotRespected(String.format(ALREADY_EXISTING_REQUEST_FOR_EVENT,
+                            eventFromDb.getId()));
+                });
+
         if (eventFromDb.getParticipantLimit() > 0) {
             List<CountByEvent> confirmed = requestRepository
                     .countByStatusRequests(List.of(eventFromDb.getId()), RequestStatus.CONFIRMED);

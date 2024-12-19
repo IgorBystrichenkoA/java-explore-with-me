@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.ewm.event.model.QEvent;
@@ -40,7 +41,7 @@ public class AdminEventParam {
     private UpdateEventRequest updateEventRequest;
 
     public Predicate toPredicate() {
-        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        BooleanBuilder booleanBuilder = new BooleanBuilder(Expressions.TRUE);
         if (users != null && !users.isEmpty()) {
             BooleanExpression byUsers = QEvent.event.initiator.id.in(users);
             booleanBuilder.and(byUsers);
