@@ -83,7 +83,6 @@ public class EventController {
         PublicEventParam publicEventParam = new PublicEventParam();
         publicEventParam.setEventId(id);
         EventFullDto event = eventService.getPublishedById(publicEventParam);
-        hit(request);
         hitAndMerge(List.of(event), request);
         return event;
     }
