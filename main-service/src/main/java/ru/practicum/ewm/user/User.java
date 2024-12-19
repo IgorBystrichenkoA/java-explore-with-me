@@ -18,10 +18,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "email")
@@ -31,5 +30,4 @@ public class User {
     @Column(name = "name")
     @Size(min = 2, max = 250)
     private String name;
-
 }

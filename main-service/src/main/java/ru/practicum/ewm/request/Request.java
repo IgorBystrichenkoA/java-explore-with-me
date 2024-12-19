@@ -30,17 +30,17 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class Request {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime created;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id")
     private Event event;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "request_id")
-    private Long id;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "requester_id")

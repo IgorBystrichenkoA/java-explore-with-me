@@ -76,9 +76,7 @@ public class EventServiceImpl implements EventService {
 
         Predicate predicate = adminEventParam.toPredicate();
         Pageable pageable = new OffsetBasedPageRequest(adminEventParam.getFrom(), adminEventParam.getSize());
-        Page<Event> eventList = predicate != null ?
-                eventRepository.findAll(predicate, pageable) :
-                eventRepository.findAll(pageable);
+        Page<Event> eventList = eventRepository.findAll(predicate, pageable);
 
         List<EventFullDto> result = EventMapper.toListEventFullDto(eventList.getContent());
         mergeViews(result);
@@ -103,13 +101,9 @@ public class EventServiceImpl implements EventService {
             oldEvent.setEventDate(newEvent.getEventDate());
         }
         if (newEvent.getLocation() != null) {
-            Optional<Location> location = locationRepository
-                    .findByLatAndLon(newEvent.getLocation().getLat(), newEvent.getLocation().getLon());
-            if (location.isPresent()) {
-                newEvent.setLocation(location.get());
-            } else {
-                newEvent.setLocation(locationRepository.save(newEvent.getLocation()));
-            }
+            locationRepository.findByLatAndLon(newEvent.getLocation().getLat(), newEvent.getLocation().getLon())
+                    .ifPresentOrElse(newEvent::setLocation,
+                            () -> newEvent.setLocation(locationRepository.save(newEvent.getLocation())));
         }
         if (newEvent.getPaid() != null) {
             oldEvent.setPaid(newEvent.getPaid());

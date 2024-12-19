@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,10 +34,11 @@ public class CategoryServiceImpl implements CategoryService {
     public Category create(CategoryDto categoryDto) {
         log.info("ADMIN: Получен запрос на создание категории {}", categoryDto);
 
-        Optional<Category> existingCategory = categoryRepository.findByName(categoryDto.getName());
-        if (existingCategory.isPresent()) {
-            throw new ConditionsNotRespected(String.format(CATEGORY_ALREADY_EXIST, categoryDto.getName()));
-        }
+        categoryRepository.findByName(categoryDto.getName())
+                .ifPresent(category -> {
+                    throw new ConditionsNotRespected(String.format(CATEGORY_ALREADY_EXIST, category.getName()));
+                });
+
         Category categorySaved = categoryRepository.save(new Category(categoryDto.getName()));
 
         log.info("ADMIN: Создана новая категория {}", categorySaved);
@@ -68,10 +68,11 @@ public class CategoryServiceImpl implements CategoryService {
         String name = updateCategoryDto.getName();
         Long id = updateCategoryDto.getId();
 
-        Optional<Category> existingCategory = categoryRepository.findByName(name);
-        if (existingCategory.isPresent() && !existingCategory.get().getId().equals(id)) {
-            throw new ConditionsNotRespected(String.format(CATEGORY_ALREADY_EXIST, name));
-        }
+        categoryRepository.findByName(name).ifPresent(existingCategory -> {
+            if (!existingCategory.getId().equals(id)) {
+                throw new ConditionsNotRespected(String.format(CATEGORY_ALREADY_EXIST, name));
+            }
+        });
 
         Category categoryFromDb = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format(NOT_EXISTING_CATEGORY, id)));

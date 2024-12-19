@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.user.dto.CreateUserDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +38,11 @@ public class UserServiceImpl implements UserService {
                 .email(userDto.getEmail())
                 .name(userDto.getName())
                 .build();
-        Optional<User> userFromDb = userRepository.getUserByEmail(user.getEmail());
-        if (userFromDb.isPresent()) {
-            throw new ConditionsNotRespected(String.format(USER_EXISTS_BY_EMAIL, user.getEmail()));
-        }
+
+        userRepository.getUserByEmail(user.getEmail()).ifPresent(e -> {
+                    throw new ConditionsNotRespected(String.format(USER_EXISTS_BY_EMAIL, user.getId()));
+                });
+
         User savedUser = userRepository.save(user);
 
         log.info("ADMIN: Новый пользователь создан: {}", userDto);

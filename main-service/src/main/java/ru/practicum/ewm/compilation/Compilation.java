@@ -1,17 +1,8 @@
 package ru.practicum.ewm.compilation;
 
+import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.ewm.event.model.Event;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -21,21 +12,21 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Slf4j
-@ToString
 @Builder
+@NamedEntityGraph(name = "compilation.graph", attributeNodes = {
+        @NamedAttributeNode("events")
+})
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "compilation_id")
+    @Column(name = "id")
     private Long id;
-
     private Boolean pinned;
     private String title;
-    @JoinColumn(name = "event_list")
-    private List<Long> eventList;
-    @ElementCollection
-    @Transient
-    private List<Event> events;
-
+    @ManyToMany
+    @JoinTable(name = "compilation_events",
+            joinColumns = @JoinColumn(name = "compilation_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id"))
+    @Builder.Default
+    private List<Event> events = List.of();
 }
