@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.comment.Comment;
 import ru.practicum.ewm.comment.CommentRepository;
 import ru.practicum.ewm.comment.PublicCommentParam;
@@ -23,6 +24,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
@@ -50,12 +52,14 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("PUBLIC: Получен список комментариев события по id: {} получено: {}",
                 publicCommentParam.getEventId(), comments.size());
-        return List.of();
+        return comments;
     }
 
     @Override
+    @Transactional
     public Comment add(NewCommentDto newComment) {
-        log.info("PUBLIC: Запрос на добавление комментария");
+        log.info("PUBLIC: Запрос на добавление комментария к событию по id: {}, от пользователя: {}",
+                newComment.getEventId(), newComment.getAuthorId());
 
         User author = userRepository.findById(newComment.getAuthorId())
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_USER));
@@ -64,13 +68,14 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment(author, newComment.getText(), event);
         Comment commentSaved = commentRepository.save(comment);
 
-        log.info("PUBLIC: Запрос на добавление комментария успешно выполнен");
+        log.info("PUBLIC: Запрос на добавление комментария успешно выполнен. id: {}", commentSaved.getId());
         return commentSaved;
     }
 
     @Override
+    @Transactional
     public Comment update(CommentDto commentDto) {
-        log.info("PUBLIC: Запрос на обновление комментария");
+        log.info("PUBLIC: Запрос на обновление комментария по id: {}", commentDto.getId());
 
         Comment commentFromDb = commentRepository.findById(commentDto.getId())
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMMENT));
@@ -84,13 +89,14 @@ public class CommentServiceImpl implements CommentService {
         }
         Comment commentSaved = commentRepository.save(commentFromDb);
 
-        log.info("PUBLIC: Запрос на обновление комментария успешно выполнен");
+        log.info("PUBLIC: Запрос на обновление комментария по id: {}, успешно выполнен", commentSaved.getId());
         return commentSaved;
     }
 
     @Override
+    @Transactional
     public void delete(CommentDto commentDto) {
-        log.info("PUBLIC: Запрос на удаление комментария");
+        log.info("PUBLIC: Запрос на удаление комментария по id: {}", commentDto.getId());
 
         Comment commentFromDb = commentRepository.findById(commentDto.getId())
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMMENT));
@@ -105,12 +111,13 @@ public class CommentServiceImpl implements CommentService {
         }
         commentRepository.delete(commentFromDb);
 
-        log.info("PUBLIC: Запрос на удаление комментария успешно выполнен");
+        log.info("PUBLIC: Запрос на удаление комментария по id: {}, успешно выполнен", commentDto.getId());
     }
 
     @Override
+    @Transactional
     public Comment updateFromAdmin(CommentDto commentDto) {
-        log.info("ADMIN: Запрос на обновление комментария");
+        log.info("ADMIN: Запрос на обновление комментария по id: {}", commentDto.getId());
 
         Comment commentFromDb = commentRepository.findById(commentDto.getId())
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMMENT));
@@ -119,18 +126,19 @@ public class CommentServiceImpl implements CommentService {
         }
         Comment commentSaved = commentRepository.save(commentFromDb);
 
-        log.info("ADMIN: Запрос на обновление комментария успешно выполнен");
+        log.info("ADMIN: Запрос на обновление комментария по id: {}, успешно выполнен", commentSaved.getId());
         return commentSaved;
     }
 
     @Override
+    @Transactional
     public void deleteFromAdmin(Long commentId) {
-        log.info("ADMIN: Запрос на удаление комментария");
+        log.info("ADMIN: Запрос на удаление комментария по id: {}", commentId);
 
         Comment commentFromDb = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(NOT_EXISTING_COMMENT));
         commentRepository.delete(commentFromDb);
 
-        log.info("ADMIN: Запрос на удаление комментария успешно выполнен");
+        log.info("ADMIN: Запрос на удаление комментария по id: {}, успешно выполнен", commentId);
     }
 }
